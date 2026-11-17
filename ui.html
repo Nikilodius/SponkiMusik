@@ -1,0 +1,1874 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="icons/uicons.css">
+<title>Sponki</title>
+<style>
+  :root {
+    --bg: #0b0b0e;
+    --bg2: #111117;
+    --bg3: #191922;
+    --bg4: #22222c;
+    --line: #26262e;
+    --text: #f4f4f7;
+    --text2: #a4a4b0;
+    --text3: #67676f;
+    --accent: #4dc2ff;
+    --accent-glow: rgba(77,194,255,.35);
+    --like: #ff3f6e;
+    --wave1: #7b5cff;
+    --wave2: #ff7a5c;
+    --radius: 14px;
+    --shadow: 0 10px 36px rgba(0,0,0,.5);
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  /* иконки flaticon UIcons */
+  .fi { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+  body {
+    font-family: "YS Text", "Segoe UI", system-ui, sans-serif;
+    background: var(--bg); color: var(--text);
+    display: flex; flex-direction: column; overflow: hidden;
+    user-select: none; -webkit-font-smoothing: antialiased;
+  }
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-thumb { background: #2b2b34; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a3a45; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes eq { 0%,100% { height: 4px; } 50% { height: 15px; } }
+  @keyframes shimmer { 0% { background-position: -300px 0; } 100% { background-position: 300px 0; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes wavePulse { 0%,100% { opacity: .5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  @keyframes popIn { from { opacity: 0; transform: scale(.92) translateY(10px); } to { opacity: 1; transform: none; } }
+
+  .fade-up { animation: fadeUp .5s var(--ease) both; }
+
+  /* ---------- Шапка ---------- */
+  header {
+    display: flex; align-items: center; gap: 18px;
+    padding: 13px 24px; background: rgba(11,11,14,.88); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--line); z-index: 10;
+  }
+  .logo { display: flex; align-items: center; gap: 11px; font-weight: 700; font-size: 17px; white-space: nowrap; }
+  .logo .mark {
+    width: 36px; height: 36px; border-radius: 11px;
+    background: linear-gradient(135deg, #4dc2ff 0%, #2a7fff 55%, #6a5cff 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; box-shadow: 0 4px 18px var(--accent-glow);
+    animation: float 5s ease-in-out infinite;
+  }
+  .search-wrap { flex: 1; max-width: 620px; position: relative; }
+  .search-wrap::before {
+    content: "\ed83"; font-family: uicons-regular-rounded !important; font-size: 15px; position: absolute; left: 17px; top: 50%; transform: translateY(-50%);
+    font-size: 13px; pointer-events: none; filter: grayscale(1) brightness(1.7); z-index: 1;
+    transition: transform .25s var(--ease), filter .25s;
+  }
+  .search-wrap:focus-within::before { transform: translateY(-50%) scale(1.15); filter: grayscale(0) brightness(1); }
+  #search {
+    width: 100%; padding: 11px 20px 11px 46px; border-radius: 26px; border: 1px solid transparent;
+    background: var(--bg3); color: var(--text); outline: none; font-size: 14px;
+    transition: border-color .25s, background .25s, box-shadow .3s, transform .2s;
+  }
+  #search:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(77,194,255,.12); background: var(--bg4); }
+
+  #wave-btn {
+    margin-left: auto; display: flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, rgba(123,92,255,.22), rgba(255,122,92,.18));
+    border: 1px solid rgba(123,92,255,.4); color: #cfc4ff; padding: 10px 20px;
+    border-radius: 24px; cursor: pointer; font-size: 13.5px; font-weight: 600;
+    transition: all .25s var(--ease); white-space: nowrap;
+  }
+  #wave-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(123,92,255,.35); border-color: var(--wave1); }
+  #wave-btn:active { transform: scale(.97); }
+  #wave-btn .fi { font-size: 17px; animation: wavePulse 2.4s ease-in-out infinite; }
+  .ctl-header {
+    background: none; border: none; color: var(--text2); cursor: pointer; padding: 9px;
+    border-radius: 12px; transition: all .2s; font-size: 18px; display: flex;
+  }
+  .ctl-header:hover { background: var(--bg3); color: var(--accent); transform: scale(1.1); }
+
+  /* темы: свотчи цветов */
+  .theme-swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+  .swatch {
+    width: 42px; height: 42px; border-radius: 50%; cursor: pointer; border: 2.5px solid transparent;
+    transition: transform .2s var(--ease), border-color .2s, box-shadow .2s; position: relative;
+  }
+  .swatch:hover { transform: scale(1.15); }
+  .swatch.selected { border-color: #fff; box-shadow: 0 0 0 3px var(--bg4), 0 0 16px rgba(255,255,255,.25); }
+  .swatch.selected::after {
+    content: "\2713"; position: absolute; inset: 0; display: flex; align-items: center;
+    justify-content: center; color: #fff; font-size: 18px; font-weight: 900; text-shadow: 0 1px 4px rgba(0,0,0,.6);
+  }
+  .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 2px; }
+  .settings-row label { font-size: 13.5px; color: var(--text); }
+  .settings-row .hint { font-size: 11px; color: var(--text3); display: block; margin-top: 2px; }
+
+  /* ---------- Каркас ---------- */
+  main { flex: 1; display: flex; overflow: hidden; }
+  nav {
+    width: 240px; min-width: 240px; padding: 16px 12px; display: flex; flex-direction: column; gap: 3px;
+    background: var(--bg2); border-right: 1px solid var(--line); overflow-y: auto;
+  }
+
+  /* ---------- Адаптивность ---------- */
+  @media (max-width: 1080px) {
+    nav { width: 200px; min-width: 200px; }
+    #p-info { width: 170px; }
+    #vol-wrap { width: 120px; }
+    #progress-wrap { max-width: 300px; }
+    #lyrics-body { padding: 30px 36px; }
+    #lyrics-body .line { font-size: 19px; }
+    #sphere-stage { height: 360px; }
+    #sphere-canvas { width: 300px; height: 300px; }
+  }
+  @media (max-width: 880px) {
+    nav { width: 64px; min-width: 64px; padding: 14px 8px; }
+    .nav-btn { justify-content: center; padding: 12px 0; }
+    .nav-btn .cnt { display: none; }
+    .nav-btn > span, .nav-pl .title, .nav-pl .cnt { display: none; }
+    .nav-sep { text-align: center; letter-spacing: 0; font-size: 10px; overflow: hidden; white-space: nowrap; }
+    .nav-sep .new-pl { display: none; }
+    .nav-pl { justify-content: center; }
+    .nav-pl .del { display: none; }
+    .history-item { display: none; }
+    #p-info { width: 120px; }
+    #p-artist { display: none; }
+    #progress-wrap { max-width: none; }
+    #vol-wrap { width: 90px; }
+    #content { padding: 18px 16px 30px; }
+    h2 { font-size: 20px; }
+    .page-head { flex-wrap: wrap; }
+    .page-head .big-icon { width: 50px; height: 50px; }
+    .page-head .big-icon .fi { font-size: 24px; }
+    #sphere-stage { height: 300px; }
+    #sphere-canvas { width: 260px; height: 260px; }
+    #lyrics-head { padding: 20px 24px 14px; }
+    #lyrics-body { padding: 24px 22px; }
+    #lyrics-body .line { font-size: 17px; }
+  }
+  @media (max-height: 700px) {
+    #sphere-stage { height: 260px; margin: 4px auto 14px; }
+  }
+  .nav-btn {
+    padding: 11px 16px; border-radius: 12px; cursor: pointer; font-size: 14px;
+    color: var(--text2); border: none; background: none; text-align: left;
+    display: flex; align-items: center; gap: 11px; transition: background .2s, color .2s;
+  }
+  .nav-btn:hover { background: var(--bg3); color: var(--text); }
+  .nav-btn.active { background: var(--bg3); color: var(--accent); font-weight: 600; }
+  .nav-btn .emoji { width: 22px; text-align: center; font-size: 15px; }
+  .nav-btn .fi { font-size: 17px; width: 22px; }
+  .nav-btn .cnt { margin-left: auto; font-size: 11px; color: var(--text3); background: var(--bg4); padding: 2px 8px; border-radius: 9px; }
+  .nav-sep { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.4px; margin: 16px 14px 6px; display: flex; align-items: center; justify-content: space-between; }
+  .nav-sep:first-child { margin-top: 0; }
+  .nav-sep .new-pl {
+    background: none; border: none; color: var(--text3); font-size: 16px; cursor: pointer;
+    padding: 2px 6px; border-radius: 8px; transition: all .2s; line-height: 1;
+  }
+  .nav-sep .new-pl:hover { color: var(--accent); transform: scale(1.25); }
+  .nav-pl { display: flex; align-items: center; gap: 2px; }
+  .nav-pl .nav-btn { flex: 1; min-width: 0; justify-content: space-between; }
+  .nav-pl .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nav-pl .del {
+    background: none; border: none; color: var(--text3); font-size: 12px; cursor: pointer;
+    padding: 5px 7px; border-radius: 8px; opacity: 0; transition: all .2s; margin-right: 4px;
+  }
+  .nav-pl:hover .del { opacity: 1; }
+  .nav-pl .del:hover { color: var(--like); }
+  .history-item {
+    padding: 9px 16px; border-radius: 10px; cursor: pointer; font-size: 13px; color: var(--text2);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background .15s, color .15s;
+  }
+  .history-item:hover { background: var(--bg3); color: var(--text); }
+
+  #content { flex: 1; overflow-y: auto; padding: 28px 32px 44px; }
+  h2 { font-size: 26px; margin-bottom: 20px; font-weight: 800; letter-spacing: -.4px; }
+  .page-head { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; animation: fadeUp .5s var(--ease) both; }
+  .page-head .big-icon {
+    width: 64px; height: 64px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow); color: #fff;
+  }
+  .page-head .big-icon .fi { font-size: 30px; }
+  .empty .big .fi { font-size: 44px; color: var(--text3); }
+  .page-head .big-icon.likes { background: linear-gradient(135deg, #ff3f6e, #b81f4a); }
+  .page-head .big-icon.wave { background: linear-gradient(135deg, #7b5cff, #ff7a5c); animation: wavePulse 3s ease-in-out infinite; }
+  .page-head .meta { font-size: 13px; color: var(--text2); margin-top: 4px; }
+  .page-head .play-all {
+    margin-left: auto; background: var(--accent); color: #0a1420; border: none; font-size: 13px;
+    font-weight: 700; padding: 11px 24px; border-radius: 24px; cursor: pointer;
+    transition: all .2s var(--ease); box-shadow: 0 4px 16px var(--accent-glow); white-space: nowrap;
+  }
+  .page-head .play-all:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 24px var(--accent-glow); }
+  .page-head .play-all:active { transform: scale(.96); }
+
+  /* ---------- Треки ---------- */
+  .track-row {
+    display: flex; align-items: center; gap: 14px; padding: 8px 14px;
+    border-radius: 12px; cursor: pointer; transition: background .18s;
+    animation: fadeUp .42s var(--ease) both;
+  }
+  .track-row:hover { background: var(--bg3); }
+  .track-row.playing { background: rgba(77,194,255,.08); }
+  .track-row img { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; background: var(--bg3); transition: transform .25s var(--ease); }
+  .track-row:hover img { transform: scale(1.07); }
+  .t-num { width: 24px; text-align: right; color: var(--text3); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .t-info { flex: 1; min-width: 0; }
+  .t-title { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track-row.playing .t-title { color: var(--accent); }
+  .t-artist { font-size: 12px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; cursor: pointer; transition: color .15s; }
+  .t-artist:hover { color: var(--accent); }
+  .sub-btn {
+    background: var(--bg3); color: var(--text); border: 1px solid var(--line); cursor: pointer;
+    padding: 10px 20px; border-radius: 22px; font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px; transition: all .2s; white-space: nowrap;
+  }
+  .sub-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .sub-btn.subscribed { background: rgba(77,194,255,.14); border-color: var(--accent); color: var(--accent); }
+  .sub-btn .fi { font-size: 15px; }
+  .t-actions { display: flex; align-items: center; gap: 4px; }
+  .icon-btn {
+    background: none; border: none; font-size: 15px; color: #3f3f4a; cursor: pointer;
+    padding: 7px; border-radius: 9px; transition: all .18s;
+  }
+  .icon-btn .fi { font-size: 16px; }
+  .play-all .fi { font-size: 14px; margin-right: 2px; }
+  .play-all.wave-pl {
+    background: linear-gradient(135deg, #7b5cff, #4dc2ff); color: #fff;
+    box-shadow: 0 4px 16px rgba(123,92,255,.3); margin-left: 10px;
+  }
+  .play-all.wave-pl:disabled { opacity: .6; cursor: wait; }
+  .nav-sep .new-pl .fi { font-size: 14px; }
+  .nav-pl .del .fi { font-size: 12px; }
+  .icon-btn:hover { color: var(--text); background: var(--bg4); transform: scale(1.15); }
+  .t-like.liked { color: var(--like); animation: popIn .25s var(--ease); }
+  .t-like:hover { color: var(--like); }
+  .t-add:hover { color: var(--accent); }
+  .t-dur { color: var(--text3); font-size: 12px; width: 42px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .eq { display: none; align-items: flex-end; gap: 2px; height: 15px; width: 24px; }
+  .eq i { width: 3px; background: var(--accent); border-radius: 1px; animation: eq .9s ease-in-out infinite; }
+  .eq i:nth-child(2) { animation-delay: .25s; }
+  .eq i:nth-child(3) { animation-delay: .5s; }
+  .track-row.playing .eq { display: flex; }
+  .track-row.playing .t-num { display: none; }
+  .eq-cell { width: 24px; text-align: center; }
+
+  /* ---------- Плеер ---------- */
+  #player {
+    height: 96px; position: relative; display: flex; align-items: center; gap: 18px; padding: 0 24px;
+    background: rgba(17,17,23,.94); backdrop-filter: blur(20px); border-top: 1px solid var(--line); z-index: 10;
+  }
+  #player-bg {
+    position: absolute; inset: 0; background-size: cover; background-position: center;
+    filter: blur(52px) brightness(.3) saturate(1.6); opacity: 0; transition: opacity 1s; z-index: -1;
+  }
+  #p-cover {
+    width: 62px; height: 62px; border-radius: 13px; background: var(--bg3); object-fit: cover;
+    box-shadow: 0 6px 20px rgba(0,0,0,.55); transition: transform .3s var(--ease);
+  }
+  #p-cover.spin { animation: spin 9s linear infinite; }
+  #p-info { width: 225px; min-width: 0; }
+  #p-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #p-artist { font-size: 12px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; }
+  #p-like { display: inline-flex; font-size: 16px; margin-left: 8px; cursor: pointer; color: #4a4a54; transition: all .18s; vertical-align: -2px; }
+  #p-like:hover { color: var(--like); transform: scale(1.25); }
+  #p-like.liked { color: var(--like); }
+
+  #controls { display: flex; align-items: center; gap: 8px; margin: 0 auto; }
+  .ctl {
+    background: none; border: none; color: var(--text2); font-size: 20px; cursor: pointer;
+    width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    transition: background .2s, color .2s, transform .12s;
+  }
+  .ctl:hover { background: var(--bg3); color: var(--text); }
+  .ctl:active { transform: scale(.88); }
+  #play-btn {
+    width: 56px; height: 56px; font-size: 22px; background: var(--accent); color: #0a1420;
+    box-shadow: 0 6px 22px var(--accent-glow); transition: transform .18s var(--ease), box-shadow .25s;
+  }
+  #play-btn .fi { font-size: 25px; margin-left: 2px; }
+  #shuffle-btn.active-sh { color: var(--accent); }
+  #shuffle-btn.active-sh .fi { filter: drop-shadow(0 0 6px var(--accent-glow)); }
+  #play-btn.paused .fi { margin-left: -2px; }
+  #play-btn .fi.fi-rr-pause { margin-left: 0; }
+  #play-btn:hover { transform: scale(1.08); box-shadow: 0 10px 30px var(--accent-glow); }
+  #play-btn:active { transform: scale(.95); }
+
+  #progress-wrap { flex: 1; max-width: 470px; margin-left: auto; }
+  #progress { width: 100%; height: 4px; border-radius: 2px; background: #2e2e38; cursor: pointer; position: relative; transition: height .15s; }
+  #progress:hover { height: 7px; }
+  #progress div { height: 100%; background: linear-gradient(90deg, var(--accent-dim, #c9a92e), var(--accent)); border-radius: 2px; width: 0%; pointer-events: none; position: relative; transition: width .18s linear; }
+  #progress div::after {
+    content: ""; position: absolute; right: -6px; top: 50%; transform: translateY(-50%) scale(0);
+    width: 13px; height: 13px; border-radius: 50%; background: #fff; transition: transform .18s;
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+  #progress:hover div::after { transform: translateY(-50%) scale(1); }
+  #time { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-top: 6px; font-variant-numeric: tabular-nums; }
+
+  /* ---------- Громкость ---------- */
+  #vol-wrap { display: flex; align-items: center; gap: 9px; width: 160px; }
+  #vol-btn { font-size: 17px; background: none; border: none; cursor: pointer; color: var(--text2); padding: 6px; border-radius: 9px; transition: all .2s; }
+  #vol-btn:hover { color: var(--text); background: var(--bg3); }
+  #vol-slider { flex: 1; height: 4px; border-radius: 2px; background: #2e2e38; cursor: pointer; position: relative; transition: height .15s; }
+  #vol-slider:hover { height: 7px; }
+  #vol-slider div { height: 100%; width: 80%; background: linear-gradient(90deg, #8a8a96, var(--accent)); border-radius: 2px; pointer-events: none; position: relative; transition: width .1s; }
+  #vol-slider div::after {
+    content: ""; position: absolute; right: -5px; top: 50%; transform: translateY(-50%) scale(0);
+    width: 11px; height: 11px; border-radius: 50%; background: var(--accent); transition: transform .18s;
+  }
+  #vol-slider:hover div::after { transform: translateY(-50%) scale(1); }
+  #vol-wrap.muted #vol-slider div { background: #3a3a44; }
+
+  .hidden { display: none !important; }
+  .empty { color: var(--text3); font-size: 14px; padding: 70px 0; text-align: center; line-height: 2.1; }
+  .empty .big { font-size: 44px; display: block; margin-bottom: 10px; }
+
+  /* ---------- Скелетоны ---------- */
+  .skel-row { display: flex; align-items: center; gap: 14px; padding: 8px 14px; }
+  .skel {
+    background: linear-gradient(90deg, var(--bg3) 25%, #24242e 50%, var(--bg3) 75%);
+    background-size: 600px 100%; animation: shimmer 1.4s linear infinite; border-radius: 10px;
+  }
+  .skel.sq { width: 48px; height: 48px; }
+  .skel.line { height: 12px; }
+
+  /* ---------- Тосты ---------- */
+  #toast {
+    position: fixed; bottom: 112px; left: 50%; transform: translateX(-50%) translateY(24px);
+    background: #22232c; color: var(--text); border: 1px solid #3a3a46; padding: 11px 26px;
+    border-radius: 14px; font-size: 13px; opacity: 0; transition: all .35s var(--ease); z-index: 100;
+    box-shadow: var(--shadow); max-width: 70%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    animation: popIn .3s var(--ease);
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%); }
+
+  /* ---------- Модалка «в плейлист» ---------- */
+  #modal-back {
+    position: fixed; inset: 0; background: rgba(5,5,8,.6); backdrop-filter: blur(4px);
+    z-index: 80; display: none; align-items: center; justify-content: center;
+    animation: fadeIn .25s;
+  }
+  #modal-back.show { display: flex; }
+  #modal {
+    width: 340px; max-height: 70vh; background: var(--bg2); border: 1px solid var(--line);
+    border-radius: 20px; padding: 22px; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: 8px; animation: popIn .3s var(--ease);
+  }
+  #modal h3 { font-size: 16px; margin-bottom: 8px; }
+  #modal .pl-choice {
+    padding: 12px 14px; border-radius: 12px; cursor: pointer; font-size: 14px; color: var(--text2);
+    transition: background .15s, color .15s; display: flex; justify-content: space-between;
+  }
+  #modal .pl-choice:hover { background: var(--bg3); color: var(--text); }
+  #modal .pl-choice span { color: var(--text3); font-size: 12px; }
+  #modal .pl-new {
+    display: flex; gap: 8px; margin-top: 10px;
+  }
+  #modal input {
+    flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line);
+    background: var(--bg3); color: var(--text); outline: none; font-size: 13px;
+  }
+  #modal input:focus { border-color: var(--accent); }
+  #modal .pl-new button, #modal .close-m {
+    background: var(--accent); border: none; color: #14140f; padding: 10px 16px;
+    border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 12.5px; transition: all .15s;
+  }
+  #modal .close-m { background: var(--bg3); color: var(--text2); }
+  #modal .close-m:hover, #modal .pl-new button:hover { filter: brightness(1.15); }
+
+  /* ---------- Лирика ---------- */
+  #lyrics-overlay {
+    position: fixed; inset: 0; z-index: 90; display: none; flex-direction: column;
+    animation: fadeIn .35s;
+    background:
+      radial-gradient(900px 550px at 65% 8%, rgba(77,194,255,.07), transparent 60%),
+      rgba(8,8,11,.97);
+    backdrop-filter: blur(12px);
+  }
+  #lyrics-overlay.show { display: flex; }
+  #lyrics-overlay .lyrics-bg {
+    position: absolute; inset: 0; background-size: cover; background-position: center;
+    filter: blur(70px) brightness(.25) saturate(1.6); opacity: 0; transition: opacity .8s; z-index: -1;
+  }
+  #lyrics-head {
+    display: flex; align-items: center; gap: 18px; padding: 30px 46px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  #lyrics-head img {
+    width: 64px; height: 64px; border-radius: 14px; object-fit: cover; box-shadow: var(--shadow);
+  }
+  #lyrics-head .l-title { font-size: 20px; font-weight: 700; }
+  #lyrics-head .l-artist { font-size: 13px; color: var(--text2); margin-top: 4px; }
+  #lyrics-close {
+    margin-left: auto; background: var(--bg3); border: none; color: var(--text2); cursor: pointer;
+    width: 46px; height: 46px; border-radius: 50%; font-size: 18px; display: flex;
+    align-items: center; justify-content: center; transition: all .2s;
+  }
+  #lyrics-close:hover { color: var(--text); transform: rotate(90deg); background: var(--bg4); }
+  #lyrics-body {
+    flex: 1; overflow-y: auto; padding: 40px 70px; user-select: text;
+  }
+  #lyrics-body .line {
+    font-size: 24px; line-height: 1.65; padding: 9px 0; color: var(--text2);
+    transition: color .35s, transform .35s var(--ease), opacity .35s, filter .35s;
+    transform-origin: left center; cursor: default; font-weight: 400;
+    letter-spacing: .2px; filter: blur(.4px); opacity: .75;
+  }
+  #lyrics-body .line:hover { opacity: 1; filter: none; color: var(--text); }
+  #lyrics-body .line.active {
+    font-size: 28px; line-height: 1.5; padding: 12px 0;
+    color: var(--accent); font-weight: 700; transform: scale(1.045);
+    text-shadow: 0 0 28px rgba(77,194,255,.4), 0 0 60px rgba(77,194,255,.15);
+    filter: none; opacity: 1;
+  }
+  #lyrics-body .line:not(.active) { transform: scale(1); }
+  #lyrics-body .placeholder {
+    color: var(--text3); font-size: 15px; text-align: center; padding: 60px 0; line-height: 2;
+  }
+  #lyrics-body .placeholder .fi { font-size: 40px; display: block; margin-bottom: 12px; }
+
+  /* ---------- Сфера «Моя волна» + жанры по кругу ---------- */
+  #sphere-stage {
+    position: relative; height: 480px; margin: 6px auto 20px; max-width: 760px;
+    display: flex; align-items: center; justify-content: center;
+    animation: fadeIn .6s var(--ease);
+  }
+  #sphere-canvas { border-radius: 50%; cursor: pointer; transition: transform .4s var(--ease); z-index: 2; }
+  #sphere-stage:hover #sphere-canvas { transform: scale(1.02); }
+  #sphere-glow {
+    position: absolute; width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(77,194,255,.4) 0%, rgba(123,92,255,.28) 40%, transparent 68%);
+    filter: blur(32px); z-index: 0; animation: wavePulse 4.5s ease-in-out infinite;
+  }
+  #sphere-hint {
+    position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+    color: var(--text3); font-size: 12px; white-space: nowrap;
+    background: var(--bg2); padding: 5px 16px; border-radius: 14px; border: 1px solid var(--line);
+    opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 3;
+  }
+  #sphere-stage:hover #sphere-hint { opacity: 1; }
+  .genre-dot {
+    position: absolute; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 5px;
+    cursor: pointer; transition: transform .25s var(--ease), opacity .25s;
+    animation: popIn .5s var(--ease) both;
+  }
+  .genre-dot:hover { transform: scale(1.14); }
+  .genre-dot .g-disc {
+    width: 54px; height: 54px; border-radius: 50%;
+    background: radial-gradient(circle at 34% 30%, var(--g1), var(--g2));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,.45), inset 0 0 0 1.5px rgba(255,255,255,.18);
+    transition: box-shadow .25s, transform .25s; color: #fff;
+  }
+  .genre-dot .g-disc .fi { font-size: 23px; }
+  .genre-dot:hover .g-disc, .genre-dot.active .g-disc {
+    box-shadow: 0 0 0 3px var(--accent), 0 8px 24px rgba(77,194,255,.35);
+  }
+  .genre-dot .g-name {
+    font-size: 11.5px; color: var(--text2); background: var(--bg2);
+    padding: 3px 10px; border-radius: 10px; white-space: nowrap; border: 1px solid var(--line);
+  }
+  .genre-dot.active .g-name { color: var(--accent); border-color: var(--accent); }
+  #sphere-meta {
+    text-align: center; margin: -4px 0 26px; color: var(--text2); font-size: 13px; line-height: 1.7;
+    animation: fadeUp .5s var(--ease) both;
+  }
+  #sphere-meta .fi { color: var(--accent); margin-right: 4px; }
+
+  /* ---------- Универсальные модалки ---------- */
+  .modal-back {
+    position: fixed; inset: 0; background: rgba(5,5,8,.65); backdrop-filter: blur(5px);
+    z-index: 85; display: flex; align-items: center; justify-content: center;
+    animation: fadeIn .25s;
+  }
+  .modal-back.hidden { display: none; }
+  .modal-box {
+    width: 400px; background: var(--bg2); border: 1px solid var(--line);
+    border-radius: 22px; padding: 24px; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: 12px; animation: popIn .3s var(--ease);
+  }
+  .modal-box h3 { font-size: 17px; display: flex; align-items: center; gap: 10px; }
+  .modal-box h3 .fi { color: var(--accent); font-size: 19px; }
+  .modal-sub { font-size: 12.5px; color: var(--text2); line-height: 1.5; }
+  .close-m {
+    background: var(--bg3); border: none; color: var(--text2); padding: 10px;
+    border-radius: 12px; cursor: pointer; font-size: 13px; transition: all .2s;
+  }
+  .close-m:hover { color: var(--text); background: var(--bg4); }
+  .import-row { display: flex; gap: 8px; }
+  .import-row input {
+    flex: 1; padding: 11px 14px; border-radius: 12px; border: 1px solid var(--line);
+    background: var(--bg3); color: var(--text); outline: none; font-size: 12.5px;
+  }
+  .import-row input:focus { border-color: var(--accent); }
+  .import-row button, #import-go {
+    background: var(--accent); border: none; color: #0a1420; padding: 10px 18px;
+    border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 12.5px; transition: all .15s;
+  }
+  .import-row button:hover { filter: brightness(1.15); }
+  #import-status { font-size: 12.5px; color: var(--text2); min-height: 18px; line-height: 1.5; }
+  #import-status.err { color: #ff8a9b; }
+  #import-progress-box { display: flex; flex-direction: column; gap: 8px; }
+  #import-progress-bar {
+    height: 8px; border-radius: 4px; background: var(--bg3); overflow: hidden;
+  }
+  #import-progress-bar div {
+    height: 100%; width: 0%; border-radius: 4px;
+    background: linear-gradient(90deg, #2a8fc9, #4dc2ff);
+    transition: width .5s var(--ease);
+    box-shadow: 0 0 10px rgba(77,194,255,.4);
+  }
+  #import-progress-text { font-size: 12px; color: var(--text2); }
+
+  /* качество */
+  .q-choice {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 14px; border-radius: 13px; cursor: pointer; transition: background .15s;
+    border: 1px solid transparent;
+  }
+  .q-choice:hover { background: var(--bg3); }
+  .q-choice.selected { background: var(--bg3); border-color: var(--accent); }
+  .q-choice.selected .fi { opacity: 1; }
+  .q-choice .fi { opacity: 0; color: var(--accent); font-size: 17px; transition: opacity .2s; }
+  .q-choice b { display: block; font-size: 14px; }
+  .q-choice span { display: block; font-size: 11.5px; color: var(--text3); margin-top: 2px; }
+
+  /* эквалайзер */
+  .eq-box { width: 460px; }
+  .eq-presets { display: flex; flex-wrap: wrap; gap: 7px; }
+  .eq-preset {
+    background: var(--bg3); border: 1px solid var(--line); color: var(--text2);
+    padding: 7px 14px; border-radius: 16px; cursor: pointer; font-size: 12px; transition: all .2s;
+  }
+  .eq-preset:hover { color: var(--text); border-color: var(--text3); }
+  .eq-preset.active { background: rgba(77,194,255,.15); border-color: var(--accent); color: var(--accent); }
+  .eq-sliders { display: flex; justify-content: space-around; padding: 14px 10px 4px; }
+  .eq-band { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .eq-band label { font-size: 10.5px; color: var(--text3); }
+  .eq-band input[type="range"] {
+    writing-mode: vertical-lr; direction: rtl; width: 22px; height: 130px;
+    -webkit-appearance: slider-vertical; appearance: slider-vertical;
+    accent-color: var(--accent); cursor: pointer;
+  }
+
+  /* ---------- Полный экран лирики: плеер остаётся поверх ---------- */
+  body.lyrics-open #player {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 99;
+    background: rgba(11,11,14,.97); border-top: 1px solid var(--line);
+  }
+  body.lyrics-open #lyrics-body { padding-bottom: 140px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><div class="mark"><i class="fi fi-rr-music"></i></div><div>Sponki</div></div>
+  <div class="search-wrap"><input id="search" placeholder="Трек или исполнитель"></div>
+  <button id="wave-btn"><i class="fi fi-rr-waveform"></i>Моя волна</button>
+  <button id="theme-btn" class="ctl-header" title="Настройки"><i class="fi fi-rr-palette"></i></button>
+</header>
+
+<main>
+  <nav>
+    <div class="nav-sep">Библиотека</div>
+    <button class="nav-btn" data-page="search-page"><i class="fi fi-rr-search"></i>Поиск</button>
+    <button class="nav-btn" data-page="wave-page"><i class="fi fi-rr-wave"></i>Моя волна</button>
+    <button class="nav-btn" data-page="likes-page"><i class="fi fi-rr-heart"></i>Мне нравится<span class="cnt" id="likes-cnt">0</span></button>
+    <div class="nav-sep">Плейлисты<button class="new-pl" id="import-pl-btn" title="Импорт из Яндекс Музыки / Spotify"><i class="fi fi-rr-download"></i></button><button class="new-pl" id="new-pl-btn" title="Новый плейлист"><i class="fi fi-rr-plus"></i></button></div>
+    <div id="pl-list"></div>
+    <div class="nav-sep">Подписки</div>
+    <div id="subs-list"></div>
+    <div class="nav-sep">Недавно искали</div>
+    <div id="history-list"></div>
+  </nav>
+  <div id="content">
+    <div id="search-page">
+      <div class="empty"><span class="big"><i class="fi fi-rr-music"></i></span>Найди любую музыку<br>Без входа, без подписки</div>
+    </div>
+    <div id="wave-page" class="hidden"></div>
+    <div id="likes-page" class="hidden"></div>
+    <div id="pl-page" class="hidden"></div>
+    <div id="artist-page" class="hidden"></div>
+  </div>
+</main>
+
+<div id="player">
+  <div id="player-bg"></div>
+  <img id="p-cover" alt="">
+  <div id="p-info">
+    <div id="p-title">Ничего не играет<span id="p-like" class="hidden"><i class="fi fi-rr-heart"></i></span></div>
+    <div id="p-artist">Выбери трек в списке или включи Мою волну</div>
+  </div>
+  <div id="controls">
+    <button class="ctl" id="shuffle-btn" title="Перемешать"><i class="fi fi-rr-shuffle"></i></button>
+    <button class="ctl" id="prev-btn"><i class="fi fi-rr-rewind"></i></button>
+    <button class="ctl" id="play-btn"><i class="fi fi-rr-play" id="play-icon"></i></button>
+    <button class="ctl" id="next-btn"><i class="fi fi-rr-forward"></i></button>
+  </div>
+  <div id="progress-wrap">
+    <div id="progress"><div></div></div>
+    <div id="time"><span id="t-cur">0:00</span><span id="t-dur">0:00</span></div>
+  </div>
+  <div id="vol-wrap">
+    <button id="vol-btn" title="Без звука"><i class="fi fi-rr-volume" id="vol-icon"></i></button>
+    <div id="vol-slider"><div></div></div>
+  </div>
+  <button id="eq-btn" class="ctl" title="Эквалайзер"><i class="fi fi-rr-equalizer"></i></button>
+  <button id="quality-btn" class="ctl" title="Качество звука"><i class="fi fi-rr-settings-sliders"></i></button>
+  <button id="fs-btn" class="ctl" title="Полный экран"><i class="fi fi-rr-expand"></i></button>
+  <button id="lyrics-btn" class="ctl" title="Текст песни"><i class="fi fi-rr-align-left"></i></button>
+</div>
+
+<div id="toast"></div>
+
+<!-- Импорт плейлиста -->
+<div id="import-modal" class="modal-back hidden">
+  <div class="modal-box">
+    <h3><i class="fi fi-rr-download"></i> Импорт плейлиста</h3>
+    <div class="modal-sub">Вставь публичную ссылку на плейлист — треки найдутся на YouTube</div>
+    <div class="import-row">
+      <input id="import-url" placeholder="https://music.yandex.ru/users/.../playlists/... или https://open.spotify.com/playlist/...">
+      <button id="import-go">Импорт</button>
+    </div>
+    <div id="import-progress-box" class="hidden">
+      <div id="import-progress-bar"><div></div></div>
+      <div id="import-progress-text">Готовлю…</div>
+    </div>
+    <div id="import-status"></div>
+    <button class="close-m" id="import-close">Закрыть</button>
+  </div>
+</div>
+
+<!-- Качество звука -->
+<div id="quality-modal" class="modal-back hidden">
+  <div class="modal-box">
+    <h3><i class="fi fi-rr-settings-sliders"></i> Качество звука</h3>
+    <div class="modal-sub">YouTube отдаёт аудио до ~160 kbps (AAC). Выбор кодека:</div>
+    <div id="quality-list">
+      <div class="q-choice" data-q="aac">
+        <div><b>AAC / m4a</b><span>~130–160 kbps · качество по умолчанию</span></div>
+        <i class="fi fi-rr-check"></i>
+      </div>
+      <div class="q-choice" data-q="opus">
+        <div><b>Opus / webm</b><span>~140–160 kbps · иногда чуть выше битрейт</span></div>
+        <i class="fi fi-rr-check"></i>
+      </div>
+      <div class="q-choice" data-q="best">
+        <div><b>Максимальное</b><span>любой кодек, самый высокий битрейт</span></div>
+        <i class="fi fi-rr-check"></i>
+      </div>
+    </div>
+    <button class="close-m" id="quality-close">Закрыть</button>
+  </div>
+</div>
+
+<!-- Настройки / темы -->
+<div id="settings-modal" class="modal-back hidden">
+  <div class="modal-box">
+    <h3><i class="fi fi-rr-palette"></i> Настройки</h3>
+    <div class="modal-sub">Цвет акцента интерфейса — применяется мгновенно и запоминается</div>
+    <div class="theme-swatches" id="theme-swatches"></div>
+    <button class="close-m" id="settings-close">Закрыть</button>
+  </div>
+</div>
+
+<!-- Эквалайзер -->
+<div id="eq-modal" class="modal-back hidden">
+  <div class="modal-box eq-box">
+    <h3><i class="fi fi-rr-equalizer"></i> Эквалайзер</h3>
+    <div class="eq-presets">
+      <button class="eq-preset active" data-g="0,0,0,0,0,0">Обычный</button>
+      <button class="eq-preset" data-g="5,4,2,0,-1,1">Басы</button>
+      <button class="eq-preset" data-g="3,1,0,1,3,5">Высокие</button>
+      <button class="eq-preset" data-g="4,3,1,0,-2,3">Вокал</button>
+      <button class="eq-preset" data-g="6,4,0,-2,-3,2">Рок</button>
+      <button class="eq-preset" data-g="-2,0,2,4,4,4">Электро</button>
+    </div>
+    <div class="eq-sliders">
+      <div class="eq-band"><input type="range" min="-12" max="12" value="0" step="1" data-b="0"><label>60</label></div>
+      <div class="eq-band"><input type="range" min="-12" max="12" value="0" step="1" data-b="1"><label>230</label></div>
+      <div class="eq-band"><input type="range" min="-12" max="12" value="0" step="1" data-b="2"><label>910</label></div>
+      <div class="eq-band"><input type="range" min="-12" max="12" value="0" step="1" data-b="3"><label>3.6k</label></div>
+      <div class="eq-band"><input type="range" min="-12" max="12" value="0" step="1" data-b="4"><label>14k</label></div>
+    </div>
+    <button class="close-m" id="eq-close">Закрыть</button>
+  </div>
+</div>
+
+<div id="lyrics-overlay">
+  <div class="lyrics-bg"></div>
+  <div id="lyrics-head">
+    <img id="l-cover" alt="">
+    <div>
+      <div class="l-title" id="l-title">—</div>
+      <div class="l-artist" id="l-artist">—</div>
+    </div>
+    <button id="lyrics-close"><i class="fi fi-rr-cross"></i></button>
+  </div>
+  <div id="lyrics-body"></div>
+</div>
+
+<div id="modal-back">
+  <div id="modal">
+    <h3>Добавить в плейлист</h3>
+    <div id="modal-track-name" style="font-size:12px;color:var(--text3);margin-top:-4px"></div>
+    <div id="modal-list" style="overflow-y:auto"></div>
+    <div class="pl-new">
+      <input id="new-pl-name" placeholder="Новый плейлист…">
+      <button id="create-pl-go">Создать</button>
+    </div>
+    <button class="close-m" id="modal-close">Отмена</button>
+  </div>
+</div>
+
+<audio id="audio"></audio>
+
+<script>
+const $ = s => document.querySelector(s);
+const audio = $("#audio");
+let queue = [], qIndex = -1, currentTrack = null, searchTimer = null;
+let lastTracks = [];              // треки текущей страницы
+let currentPage = "search-page";  // где мы сейчас
+let waveMode = false;             // бесконечная волна
+let playedIds = new Set();        // что уже играло в волне
+let likedIds = new Set();
+let playlists = [];
+
+// громкость
+let volume = 0.8, muted = false, lastVolume = 0.8;
+try { volume = parseFloat(localStorage.getItem("vol") || "0.8") || 0.8; } catch {}
+audio.volume = volume;
+
+// ------------------------- Мостик в Python -------------------------
+function py(fn, ...args) {
+  if (window.pywebview && window.pywebview.api) return window.pywebview.api[fn](...args);
+  return new Promise(resolve => {
+    const onReady = () => {
+      window.removeEventListener("pywebviewready", onReady);
+      resolve(window.pywebview.api[fn](...args));
+    };
+    window.addEventListener("pywebviewready", onReady);
+  });
+}
+
+// ------------------------- Тосты -------------------------
+let toastTimer = null;
+function toast(msg) {
+  $("#toast").textContent = msg;
+  $("#toast").classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => $("#toast").classList.remove("show"), 3200);
+}
+
+// ------------------------- Утилиты -------------------------
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function fmt(ms) { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+function skeletons(n) {
+  return Array(n).fill('<div class="skel-row"><div class="skel sq"></div><div style="flex:1"><div class="skel line" style="width:55%"></div><div class="skel line" style="width:35%;margin-top:8px"></div></div></div>').join("");
+}
+
+// ------------------------- Навигация -------------------------
+function switchPage(id) {
+  currentPage = id;
+  if (id !== "wave-page") stopSphere();
+  ["search-page", "wave-page", "likes-page", "pl-page", "artist-page"].forEach(p =>
+    $("#" + p).classList.toggle("hidden", p !== id));
+  document.querySelectorAll(".nav-btn[data-page]").forEach(b =>
+    b.classList.toggle("active", b.dataset.page === id));
+  document.querySelectorAll(".nav-btn[data-pl]").forEach(b => b.classList.remove("active"));
+}
+document.querySelectorAll(".nav-btn[data-page]").forEach(btn =>
+  btn.onclick = () => {
+    switchPage(btn.dataset.page);
+    if (btn.dataset.page === "likes-page") loadLikes();
+  });
+
+// ------------------------- Библиотека -------------------------
+async function loadLibrary() {
+  const r = await py("get_library");
+  if (!r.ok) return;
+  likedIds = new Set(r.liked.map(t => String(t.id)));
+  playlists = r.playlists || [];
+  $("#likes-cnt").textContent = r.liked.length;
+  // история
+  $("#history-list").innerHTML = (r.history || []).map(q =>
+    `<div class="history-item" data-q="${esc(q)}">${esc(q)}</div>`).join("");
+  // плейлисты в сайдбаре
+  $("#pl-list").innerHTML = playlists.map(p => `
+    <div class="nav-pl" data-pl="${esc(p.id)}">
+      <button class="nav-btn" data-pl="${esc(p.id)}"><span class="title">${esc(p.title)}</span><span class="cnt">${p.tracks.length}</span></button>
+      <button class="del" data-del="${esc(p.id)}" title="Удалить"><i class="fi fi-rr-cross"></i></button>
+    </div>`).join("");
+  // подписки
+  try { subscriptions = await py("get_subscriptions"); } catch {}
+  renderSubs();
+}
+
+function renderTrackRows(tracks, opts = {}) {
+  return tracks.map((t, i) => `
+    <div class="track-row" style="animation-delay:${(i * .03).toFixed(3)}s" data-i="${i}" data-tid="${esc(t.id)}">
+      <span class="t-num">${i + 1}</span>
+      <span class="eq-cell"><span class="eq"><i></i><i></i><i></i></span></span>
+      <img src="${t.cover || ""}" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="t-info">
+        <div class="t-title">${esc(t.title)}</div>
+        <div class="t-artist" data-artist="${esc(t.artists)}" title="Открыть исполнителя">${esc(t.artists)}</div>
+      </div>
+      <div class="t-actions">
+        ${opts.noAdd ? "" : `<button class="icon-btn t-add" title="В плейлист" data-add="${i}"><i class="fi fi-rr-plus"></i></button>`}
+        <button class="icon-btn t-like ${likedIds.has(String(t.id)) ? "liked" : ""}" title="Мне нравится" data-like="${i}"><i class="fi fi-rr-heart"></i></button>
+      </div>
+      <span class="t-dur">${fmt(t.duration_ms)}</span>
+    </div>`).join("");
+}
+
+// клики по строкам (делегирование)
+document.addEventListener("click", async e => {
+  // клик по имени артиста → его страница
+  const artistEl = e.target.closest(".t-artist[data-artist]");
+  if (artistEl && artistEl.dataset.artist) {
+    openArtistPage(artistEl.dataset.artist);
+    return;
+  }
+  // подписка на артиста
+  const subBtn = e.target.closest(".sub-btn");
+  if (subBtn) {
+    const artist = subBtn.dataset.artist;
+    const r = await py("subscribe_toggle", artist);
+    if (r.ok) {
+      subBtn.classList.toggle("subscribed", r.subscribed);
+      subBtn.innerHTML = r.subscribed
+        ? '<i class="fi fi-rr-check"></i> Вы подписаны'
+        : '<i class="fi fi-rr-user-add"></i> Подписаться';
+      toast(r.subscribed ? "Подписка: " + artist : "Отписка: " + artist);
+      subscriptions = await py("get_subscriptions");
+      renderSubs();
+    }
+    return;
+  }
+  const likeBtn = e.target.closest(".t-like");
+  const addBtn = e.target.closest(".t-add");
+  const row = e.target.closest(".track-row");
+  if (likeBtn && row) {
+    e.stopPropagation();
+    const t = lastTracks[parseInt(row.dataset.i)];
+    if (t) await doLike(t, likeBtn);
+    return;
+  }
+  if (addBtn && row) {
+    e.stopPropagation();
+    const t = lastTracks[parseInt(row.dataset.i)];
+    if (t) openModal(t);
+    return;
+  }
+  if (row) {
+    playQueue(lastTracks, parseInt(row.dataset.i));
+    return;
+  }
+  // сайдбар: плейлисты и история
+  const plBtn = e.target.closest(".nav-btn[data-pl]");
+  if (plBtn) { openPlaylistPage(plBtn.dataset.pl); return; }
+  const delBtn = e.target.closest("[data-del]");
+  if (delBtn) {
+    e.stopPropagation();
+    if (confirm("Удалить плейлист?")) {
+      await py("delete_playlist", delBtn.dataset.del);
+      loadLibrary();
+      if (currentPage === "pl-page") switchPage("search-page");
+      toast("Плейлист удалён");
+    }
+    return;
+  }
+  const hist = e.target.closest(".history-item");
+  if (hist) { $("#search").value = hist.dataset.q; doSearch(hist.dataset.q); return;
+  }
+});
+
+async function doLike(t, btn) {
+  const r = await py("toggle_like", t);
+  if (!r.ok) { toast("Не получилось: " + r.error); return; }
+  if (r.liked) {
+    likedIds.add(String(t.id));
+    btn.classList.add("liked");
+    toast("Добавлено в «Мне нравится»");
+    $("#likes-cnt").textContent = parseInt($("#likes-cnt").textContent || 0) + 1;
+    if (currentPage === "likes-page") loadLikes();
+    updatePlayerLike();
+  } else {
+    likedIds.delete(String(t.id));
+    btn.classList.remove("liked");
+    $("#likes-cnt").textContent = Math.max(0, parseInt($("#likes-cnt") .textContent || 0) - 1);
+    if (currentPage === "likes-page") loadLikes();
+    updatePlayerLike();
+  }
+}
+
+// ------------------------- Модалка «в плейлист» -------------------------
+let modalTrack = null;
+function openModal(t) {
+  modalTrack = t;
+  $("#modal-track-name").textContent = t.title + " — " + t.artists;
+  $("#modal-list").innerHTML = playlists.length
+    ? playlists.map(p =>
+        `<div class="pl-choice" data-pid="${esc(p.id)}">${esc(p.title)}<span>${p.tracks.length} треков</span></div>`).join("")
+    : '<div style="color:var(--text3);font-size:13px;padding:10px 0">Пока нет плейлистов — создай первый ниже</div>';
+  $("#new-pl-name").value = "";
+  $("#modal-back").classList.add("show");
+}
+$("#modal-close").onclick = () => $("#modal-back").classList.remove("show");
+$("#modal-back").onclick = e => { if (e.target.id === "modal-back") e.currentTarget.classList.remove("show"); };
+$("#modal-list").addEventListener("click", async e => {
+  const choice = e.target.closest(".pl-choice");
+  if (!choice || !modalTrack) return;
+  const r = await py("add_to_playlist", choice.dataset.pid, modalTrack);
+  $("#modal-back").classList.remove("show");
+  if (r.ok) {
+    toast(r.added ? "✓ Добавлено в плейлист" : "Трек уже там");
+    loadLibrary();
+    if (currentPage === "pl-page") openPlaylistPage(currentPlId);
+  }
+});
+async function createPlaylistGo(name) {
+  if (!name.trim()) return null;
+  const r = await py("create_playlist", name);
+  if (r.ok) { await loadLibrary(); toast("Плейлист создан"); return r.playlist; }
+  return null;
+}
+$("#create-pl-go").onclick = async () => {
+  const p = await createPlaylistGo($("#new-pl-name").value);
+  if (p && modalTrack) {
+    await py("add_to_playlist", p.id, modalTrack);
+    $("#modal-back").classList.remove("show");
+    toast("✓ Трек добавлен в «" + p.title + "»");
+  } else if (p) {
+    $("#modal-list").innerHTML = playlists.map(pl =>
+      `<div class="pl-choice" data-pid="${esc(pl.id)}">${esc(pl.title)}<span>${pl.tracks.length} треков</span></div>`).join("");
+  }
+  $("#new-pl-name").value = "";
+};
+$("#new-pl-name").addEventListener("keydown", e => { if (e.key === "Enter") $("#create-pl-go").click(); });
+
+// кнопка + в сайдбаре — просто новый плейлист
+$("#new-pl-btn").onclick = async () => {
+  const name = prompt("Название плейлиста:");
+  if (name) await createPlaylistGo(name);
+};
+
+// ------------------------- Страницы -------------------------
+// ------------------------- Страница артиста -------------------------
+let subscriptions = [];
+let currentArtist = null;
+
+async function openArtistPage(artist) {
+  currentArtist = artist;
+  switchPage("artist-page");
+  const subbed = subscriptions.includes(artist);
+  $("#artist-page").innerHTML = `
+    <div class="page-head">
+      <div class="big-icon" style="background:linear-gradient(135deg,#2a7fff,#7b5cff)"><i class="fi fi-rr-user"></i></div>
+      <div><h2 style="margin:0">${esc(artist)}</h2><div class="meta">Загружаю треки…</div></div>
+      <button class="sub-btn ${subbed ? "subscribed" : ""}" data-artist="${esc(artist)}">
+        ${subbed ? '<i class="fi fi-rr-check"></i> Вы подписаны' : '<i class="fi fi-rr-user-add"></i> Подписаться'}
+      </button>
+    </div>
+    <div>${skeletons(6)}</div>`;
+  const r = await py("artist_tracks", artist).catch(e => ({ ok: false, error: String(e) }));
+  if (currentPage !== "artist-page") return;
+  if (!r.ok) {
+    $("#artist-page").innerHTML = '<div class="empty">Не удалось загрузить: ' + esc(r.error || "?") + "</div>";
+    return;
+  }
+  lastTracks = r.tracks;
+  const meta = $("#artist-page .meta");
+  if (meta) meta.textContent = r.tracks.length + " треков";
+  const rows = $("#artist-page div:last-child");
+  rows.innerHTML = r.tracks.length
+    ? renderTrackRows(r.tracks)
+    : '<div class="empty">Треков не нашлось</div>';
+}
+
+function renderSubs() {
+  $("#subs-list").innerHTML = (subscriptions || []).slice(0, 10).map(a =>
+    `<button class="nav-btn" data-artist="${esc(a)}" onclick="openArtistPage(this.dataset.artist)">
+       <i class="fi fi-rr-user"></i><span class="title">${esc(a)}</span>
+     </button>`).join("");
+}
+
+async function loadLikes() {
+  const r = await py("get_library");
+  if (!r.ok) return;
+  const tracks = r.liked;
+  lastTracks = tracks;
+  $("#likes-page").innerHTML = tracks.length
+    ? `<div class="page-head">
+         <div class="big-icon likes"><i class="fi fi-rr-heart"></i></div>
+         <div><h2 style="margin:0">Мне нравится</h2><div class="meta">${tracks.length} треков · сохранено локально</div></div>
+         <button class="play-all" onclick="playQueue(lastTracks, 0)"><i class="fi fi-rr-play"></i> Слушать</button>
+       </div>` + renderTrackRows(tracks)
+    : '<div class="empty"><span class="big"><i class="fi fi-rr-heart"></i></span>Пока пусто<br>Жми сердечко у трека — он сохранится здесь</div>';
+}
+
+let currentPlId = null;
+async function openPlaylistPage(pid) {  const p = playlists.find(x => String(x.id) === String(pid));
+  if (!p) return;
+  currentPlId = pid;
+  switchPage("pl-page");
+  document.querySelectorAll(`.nav-btn[data-pl="${pid}"]`).forEach(b => b.classList.add("active"));
+  lastTracks = p.tracks;
+  $("#pl-page").innerHTML = p.tracks.length
+    ? `<div class="page-head">
+         <div class="big-icon" style="background:linear-gradient(135deg,#4a3a8c,#2b6b4a)"><i class="fi fi-rr-list"></i></div>
+         <div><h2 style="margin:0">${esc(p.title)}</h2><div class="meta">${p.tracks.length} треков</div></div>
+         <button class="play-all" onclick="playQueue(lastTracks, 0)"><i class="fi fi-rr-play"></i> Слушать</button>
+         <button class="play-all wave-pl" onclick="waveFromPlaylist('${esc(pid)}')"><i class="fi fi-rr-wave"></i> Волна отсюда</button>
+       </div>` + renderTrackRows(p.tracks)
+    : '<div class="empty"><span class="big"><i class="fi fi-rr-list"></i></span>Плейлист пуст<br>Ищи музыку и жми плюсик у трека</div>';
+}
+
+// волна на основе плейлиста
+async function waveFromPlaylist(pid) {
+  const btn = document.querySelector(".wave-pl");
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fi fi-rr-wave"></i> Собираю…'; }
+  const r = await py("wave_from_playlist", String(pid), JSON.stringify([...playedIds])).catch(e => ({ ok: false, error: String(e) }));
+  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fi fi-rr-wave"></i> Волна отсюда'; }
+  if (!r.ok) { toast("Не получилось: " + (r.error || "?")); return; }
+  if (!r.tracks.length) { toast("Нечего добавить — похожие треки уже закончились"); return; }
+  // добавляем к текущей очереди и играем сразу
+  if (waveMode && queue.length) {
+    queue.push(...r.tracks);
+    toast("В волну добавлено " + r.tracks.length + " похожих треков");
+  } else {
+    waveMode = true;
+    playQueue(r.tracks, 0);
+    toast("Волна из плейлиста: " + r.tracks.length + " треков");
+  }
+}
+
+// ------------------------- Поиск -------------------------
+$("#search").addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  const q = $("#search").value.trim();
+  if (q.length < 2) return;
+  searchTimer = setTimeout(() => doSearch(q), 500);
+});
+
+async function doSearch(q) {
+  switchPage("search-page");
+  waveMode = false;
+  $("#search-page").innerHTML = skeletons(8);
+  const r = await py("yt_search", q);
+  if (!r.ok) { $("#search-page").innerHTML = '<div class="empty">Ошибка: ' + esc(r.error) + "</div>"; return; }
+  py("add_history", q);
+  lastTracks = r.tracks;
+  $("#search-page").innerHTML =
+    (r.tracks.length
+      ? "<h2 class='fade-up'>«" + esc(q) + "»</h2>" + renderTrackRows(r.tracks)
+      : '<div class="empty"><span class="big"><i class="fi fi-rr-search"></i></span>Ничего не нашлось<br>Попробуй другой запрос</div>');
+}
+
+// ------------------------- Моя волна (сфера + жанры) -------------------------
+$("#wave-btn").onclick = () => startWave(true);
+document.querySelector('[data-page="wave-page"]').onclick = () => startWave(false);
+
+let sphereAnim = null, sphereTracks = [], sphereHoverIdx = -1;
+let waveGenre = null; // выбранный жанр
+
+const GENRES = [
+  { id: "pop",   name: "Поп",      icon: "fi-rr-headphones", g1: "#ff6b9d", g2: "#a13d8f", q: "pop hits" },
+  { id: "rock",  name: "Рок",      icon: "fi-rr-guitar",     g1: "#ff8a5c", g2: "#8a2f1d", q: "rock classics" },
+  { id: "hiphop",name: "Хип-хоп",  icon: "fi-rr-microphone", g1: "#c9a2ff", g2: "#5a2f8f", q: "hip hop hits" },
+  { id: "elec",  name: "Электро",  icon: "fi-rr-disk",       g1: "#4dc2ff", g2: "#1d4f8a", q: "electronic dance hits" },
+  { id: "chill", name: "Чилл",     icon: "fi-rr-moon",       g1: "#6bffd5", g2: "#1d6b5f", q: "chill lofi mix" },
+  { id: "rnb",   name: "R&B",      icon: "fi-rr-trumpet",    g1: "#ffb56b", g2: "#8a4a1d", q: "rnb soul hits" },
+  { id: "metal", name: "Метал",    icon: "fi-rr-lightning",  g1: "#9db4ff", g2: "#2f3a6b", q: "metal hits" },
+  { id: "jazz",  name: "Джаз",     icon: "fi-rr-piano",      g1: "#ffe06b", g2: "#8a6b1d", q: "jazz classics" },
+];
+
+function renderGenres() {
+  const stage = $("#sphere-stage");
+  if (!stage) return;
+  const W = stage.clientWidth, H = stage.clientHeight;
+  const cx = W / 2, cy = H / 2;
+  const radius = Math.min(W, H) / 2 + 4;
+  GENRES.forEach((g, i) => {
+    const angle = (i / GENRES.length) * Math.PI * 2 - Math.PI / 2;
+    const x = cx + Math.cos(angle) * radius;
+    const y = cy + Math.sin(angle) * radius * .78; // слегка сплюснутый эллипс
+    const dot = document.createElement("div");
+    dot.className = "genre-dot" + (waveGenre === g.id ? " active" : "");
+    dot.style.left = (x - 27) + "px";
+    dot.style.top = (y - 27) + "px";
+    dot.style.setProperty("--g1", g.g1);
+    dot.style.setProperty("--g2", g.g2);
+    dot.style.animationDelay = (i * .06) + "s";
+    dot.innerHTML = `<div class="g-disc"><i class="fi ${g.icon}"></i></div><div class="g-name">${g.name}</div>`;
+    dot.title = "Волна в жанре " + g.name;
+    dot.onclick = () => pickGenre(g);
+    stage.appendChild(dot);
+  });
+}
+
+async function pickGenre(g) {
+  waveGenre = g.id;
+  document.querySelectorAll(".genre-dot").forEach(d => d.classList.remove("active"));
+  waveMode = true;
+  $("#sphere-meta").innerHTML = `<i class="fi fi-rr-music"></i>Собираю волну «${g.name}»…`;
+  const r = await py("get_wave_by_genre", g.q, JSON.stringify([...playedIds]));
+  if (!r.ok) { $("#sphere-meta").textContent = "Ошибка: " + r.error; return; }
+  if (!r.tracks.length) { playedIds.clear(); }
+  sphereTracks = r.tracks;
+  lastTracks = r.tracks;
+  drawSphere(r.tracks, g);
+  $("#sphere-meta").innerHTML = `<i class="fi fi-rr-music"></i>Волна «${g.name}»: ${r.tracks.length} треков`;
+  if (r.tracks.length) playQueue(r.tracks, 0);
+}
+
+async function startWave(autoplay) {
+  switchPage("wave-page");
+  waveMode = true;
+  waveGenre = null;
+  $("#wave-page").innerHTML = `
+    <div class="page-head">
+      <div class="big-icon wave"><i class="fi fi-rr-wave"></i></div>
+      <div><h2 style="margin:0">Моя волна</h2><div class="meta">Бесконечный поток · выбери жанр вокруг сферы</div></div>
+      ${autoplay ? "" : '<button class="play-all" id="wave-play"><i class="fi fi-rr-play"></i> Слушать</button>'}
+    </div>
+    <div id="sphere-stage">
+      <div id="sphere-glow"></div>
+      <canvas id="sphere-canvas" width="340" height="340"></canvas>
+      <div id="sphere-hint">Клик по сфере — играть волну</div>
+    </div>
+    <div id="sphere-meta">Собираю волну…</div>`;
+  if ($("#wave-play")) $("#wave-play").onclick = () => startWave(true);
+  renderGenres();
+
+  const r = await py("get_wave", JSON.stringify([...playedIds]));
+  if (currentPage !== "wave-page") return; // ушли со страницы
+  if (!r.ok) { $("#sphere-meta").textContent = "Ошибка: " + r.error; return; }
+  if (!r.tracks.length) { playedIds.clear(); }
+  sphereTracks = r.tracks;
+  lastTracks = r.tracks;
+  drawSphere(r.tracks);
+  const n = r.tracks.length;
+  $("#sphere-meta").innerHTML = n
+    ? `<i class="fi fi-rr-wave"></i>${n} треков в волне · кликни сферу, чтобы начать`
+    : "Волна пуста — лайкни пару треков или выбери жанр вокруг сферы";
+  if (autoplay && n) playQueue(r.tracks, 0);
+}
+
+function stopSphere() { if (sphereAnim) { cancelAnimationFrame(sphereAnim); sphereAnim = null; } }
+
+function drawSphere(tracks, genre) {
+  stopSphere();
+  const canvas = $("#sphere-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2;
+  const R = 126;
+  let sphereProj = [];
+
+  // точки треков — спираль Фибоначчи
+  const pts = tracks.map((t, i) => {
+    const phi = Math.acos(1 - 2 * (i + .5) / Math.max(1, tracks.length));
+    const theta = Math.PI * (1 + Math.sqrt(5)) * (i + .5);
+    return {
+      t,
+      x: Math.sin(phi) * Math.cos(theta),
+      y: Math.sin(phi) * Math.sin(theta),
+      z: Math.cos(phi),
+    };
+  });
+
+  // звёздное небо внутри сферы (мерцающие точки)
+  const stars = Array.from({ length: 70 }, () => ({
+    a: Math.random() * Math.PI * 2,
+    r: Math.random() * R * .92,
+    size: Math.random() * 1.6 + .4,
+    tw: Math.random() * Math.PI * 2,
+  }));
+
+  // цвета жанра, если выбран
+  const c1 = genre ? genre.g1 : "#4dc2ff";
+  const c2 = genre ? genre.g2 : "#5a2f8f";
+
+  let rotY = 0, rotX = .25;
+  let last = performance.now();
+
+  function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000);
+    last = now;
+    const isPlaying = waveMode && qIndex >= 0 && audio && !audio.paused;
+    rotY += dt * (isPlaying ? .55 : .12);
+    const cur = queue[qIndex];
+
+    ctx.clearRect(0, 0, W, H);
+
+    // --- внешняя атмосфера ---
+    ctx.beginPath(); ctx.arc(cx, cy, R + 10, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(77,194,255,${.06 + (isPlaying ? .05 * Math.abs(Math.sin(now / 700)) : 0)})`;
+    ctx.lineWidth = 8; ctx.stroke();
+
+    // --- сфера ---
+    const grad = ctx.createRadialGradient(cx - R * .32, cy - R * .36, R * .15, cx, cy, R);
+    grad.addColorStop(0, c1 + "e8");
+    grad.addColorStop(.45, "rgba(70,50,160,.9)");
+    grad.addColorStop(1, "rgba(14,12,38,.97)");
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.fillStyle = grad; ctx.fill();
+    // блик
+    ctx.beginPath(); ctx.ellipse(cx - R * .38, cy - R * .42, R * .28, R * .18, -.6, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255,255,255,.12)"; ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,.16)"; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+
+    // --- звёзды внутри ---
+    for (const s of stars) {
+      const tw = .35 + .65 * Math.abs(Math.sin(now / 900 + s.tw));
+      ctx.beginPath();
+      ctx.arc(cx + Math.cos(s.a + rotY * .4) * s.r, cy + Math.sin(s.a) * s.r * .96, s.size * tw, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${.14 + tw * .3})`;
+      ctx.fill();
+    }
+
+    // --- меридианы ---
+    ctx.strokeStyle = "rgba(255,255,255,.055)"; ctx.lineWidth = 1;
+    for (let m = 0; m < 6; m++) {
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, R, R * Math.abs(Math.cos(rotY + m * Math.PI / 6)), 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // --- проекция точек ---
+    const sinY = Math.sin(rotY), cosY = Math.cos(rotY);
+    const sinX = Math.sin(rotX), cosX = Math.cos(rotX);
+    sphereProj = pts.map(p => {
+      const x1 = p.x * cosY + p.z * sinY;
+      const z1 = -p.x * sinY + p.z * cosY;
+      const y2 = p.y * cosX - z1 * sinX;
+      const z2 = p.y * sinX + z1 * cosX;
+      const scale = (z2 + 1.6) / 2.6;
+      return { px: cx + x1 * R, py: cy + y2 * R, z: z2, scale, t: p.t };
+    });
+    const ordered = sphereProj.slice().sort((a, b) => a.z - b.z);
+    for (const p of ordered) {
+      const isPlayingDot = cur && String(cur.id) === String(p.t.id);
+      const isHover = sphereHoverIdx >= 0 && sphereProj[sphereHoverIdx] === p;
+      const pulse = isPlayingDot ? 1 + .18 * Math.sin(now / 300) : 1;
+      const r = (2.6 + p.scale * 3.2 + (isPlayingDot ? 4 : 0)) * pulse;
+      // ореол
+      if (isPlayingDot || isHover) {
+        const glow = ctx.createRadialGradient(p.px, p.py, 0, p.px, p.py, r * 2.4);
+        glow.addColorStop(0, isPlayingDot ? "rgba(77,194,255,.5)" : "rgba(255,122,92,.45)");
+        glow.addColorStop(1, "transparent");
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(p.px, p.py, r * 2.4, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.beginPath();
+      ctx.arc(p.px, p.py, r, 0, Math.PI * 2);
+      if (isPlayingDot) {
+        ctx.fillStyle = "#4dc2ff"; ctx.shadowColor = "#4dc2ff"; ctx.shadowBlur = 18;
+      } else if (isHover) {
+        ctx.fillStyle = "#ff7a5c"; ctx.shadowColor = "#ff7a5c"; ctx.shadowBlur = 12;
+      } else {
+        const a = .28 + p.scale * .62;
+        ctx.fillStyle = `rgba(220,235,255,${a})`;
+        ctx.shadowBlur = 0;
+      }
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // --- подпись играющего трека под сферой ---
+    if (cur && tracks.some(t => String(t.id) === String(cur.id))) {
+      ctx.font = "700 13px Segoe UI";
+      ctx.fillStyle = "rgba(255,255,255,.95)";
+      ctx.textAlign = "center";
+      ctx.fillText((cur.title || "").slice(0, 42), cx, cy + R + 24);
+      ctx.font = "12px Segoe UI";
+      ctx.fillStyle = "rgba(160,200,255,.85)";
+      ctx.fillText((cur.artists || "").slice(0, 42), cx, cy + R + 41);
+    }
+    sphereAnim = requestAnimationFrame(frame);
+  }
+  sphereAnim = requestAnimationFrame(frame);
+
+  // клик — играть
+  canvas.onclick = () => {
+    if (!sphereTracks.length) return;
+    if (sphereHoverIdx >= 0 && sphereProj[sphereHoverIdx]) {
+      const t = sphereProj[sphereHoverIdx].t;
+      const idx = sphereTracks.findIndex(x => String(x.id) === String(t.id));
+      if (idx >= 0) { playQueue(sphereTracks, idx); return; }
+    }
+    if (waveMode && qIndex >= 0 && qIndex < queue.length - 1) { qIndex++; playCurrent(); }
+    else playQueue(sphereTracks, 0);
+  };
+  // ховер — подсветить ближайшую точку
+  canvas.onmousemove = e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (W / rect.width);
+    const my = (e.clientY - rect.top) * (H / rect.height);
+    let best = -1, bestD = 26 * 26;
+    sphereProj.forEach((p, i) => {
+      const d = (p.px - mx) ** 2 + (p.py - my) ** 2;
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    sphereHoverIdx = best;
+    canvas.style.cursor = best >= 0 ? "pointer" : "default";
+    canvas.title = best >= 0 ? (sphereProj[best].t.title + " — " + sphereProj[best].t.artists) : "";
+  };
+  canvas.onmouseleave = () => { sphereHoverIdx = -1; };
+}
+
+// ------------------------- Плеер -------------------------
+window.playQueue = playQueue;
+async function playQueue(tracks, index) {
+  if (!tracks || !tracks.length) return;
+  if (waveMode) {
+    // в волне играем выборочно, продолжая поток
+    queue = tracks.slice();
+    qIndex = index;
+  } else {
+    queue = tracks.slice();
+    qIndex = index;
+  }
+  playCurrent();
+}
+
+// защита от гонки: если запустили новый трек, старый ответ игнорируем
+let playToken = 0;
+let pendingStream = {}; // предзагрузка следующего трека
+
+async function playCurrent() {
+  if (qIndex < 0 || qIndex >= queue.length) return;
+  const myToken = ++playToken;
+  currentTrack = queue[qIndex];
+  if (waveMode) playedIds.add(String(currentTrack.id));
+  const t = currentTrack;
+  $("#p-title").childNodes[0].textContent = t.title;
+  $("#p-artist").textContent = t.artists + " · получаю поток…";
+  $("#p-cover").src = t.cover || "";
+  $("#player-bg").style.backgroundImage = t.cover ? `url("${t.cover}")` : "";
+  $("#player-bg").style.opacity = t.cover ? "1" : "0";
+  updatePlayerLike();
+  markPlayingRow();
+
+  // останавливаем текущее воспроизведение сразу — старая песня не играет
+  audio.pause();
+  try { audio.removeAttribute("src"); audio.load(); } catch {}
+
+  let res;
+  if (pendingStream[String(t.id)]) {
+    res = pendingStream[String(t.id)]; // предзагруженный
+    delete pendingStream[String(t.id)];
+  } else {
+    res = await py("yt_stream", String(t.id), audioQuality || "aac").catch(e => ({ ok: false, error: String(e) }));
+  }
+  if (myToken !== playToken) return; // уже переключили на другой трек
+  if (!res.ok) {
+    $("#p-artist").textContent = t.artists;
+    toast("Не удалось получить поток, беру следующий…");
+    if (waveMode) { nextInWave(); }
+    return;
+  }
+  $("#p-artist").textContent = t.artists;
+  audio.src = res.url + (res.url.includes("?") ? "&" : "?") + "_t=" + Date.now(); // уникальный URL — форсируем перезапуск
+  audio.load();
+  const playPromise = audio.play();
+  if (playPromise) playPromise.catch(() => toast("Не смог запустить воспроизведение"));
+  preloadNext();
+}
+
+// предзагрузка ссылки следующего трека — переключение мгновенное
+async function preloadNext() {
+  const next = queue[qIndex + 1];
+  if (!next) return;
+  const nid = String(next.id);
+  if (pendingStream[nid]) return;
+  py("yt_stream", nid, audioQuality || "aac")
+    .then(r => { if (r.ok) pendingStream[nid] = r; })
+    .catch(() => {});
+}
+
+function updatePlayerLike() {
+  const btn = $("#p-like");
+  if (!currentTrack) { btn.classList.add("hidden"); return; }
+  btn.classList.remove("hidden");
+  btn.classList.toggle("liked", likedIds.has(String(currentTrack.id)));
+}
+$("#p-like").onclick = async () => {
+  if (!currentTrack) return;
+  await doLike(currentTrack, $("#p-like"));
+};
+
+async function nextInWave() {
+  qIndex++;
+  if (qIndex >= queue.length) {
+    // подгружаем новую порцию волны
+    const r = await py("get_wave", JSON.stringify([...playedIds]));
+    if (r.ok && r.tracks.length) {
+      queue = r.tracks;
+      lastTracks = r.tracks;
+      $("#wave-page").innerHTML = waveHeadHTML() + renderTrackRows(r.tracks);
+      qIndex = 0;
+    } else {
+      playedIds.clear();
+      const r2 = await py("get_wave", JSON.stringify([]));
+      queue = r2.ok ? r2.tracks : [];
+      lastTracks = queue;
+      qIndex = 0;
+      $("#wave-page").innerHTML = waveHeadHTML() + renderTrackRows(lastTracks);
+    }
+  }
+  playCurrent();
+}
+
+function waveHeadHTML() {
+  return `<div class="page-head">
+      <div class="big-icon wave"><i class="fi fi-rr-wave"></i></div>
+      <div><h2 style="margin:0">Моя волна</h2><div class="meta">Бесконечный поток из твоих лайков и поисков</div></div>
+    </div>`;
+}
+
+function markPlayingRow() {
+  document.querySelectorAll(".track-row").forEach(r => r.classList.remove("playing"));
+  if (qIndex < 0 || !queue[qIndex]) return;
+  const playingId = String(queue[qIndex].id);
+  document.querySelectorAll(".track-row").forEach(row => {
+    if (String(row.dataset.tid) === playingId) row.classList.add("playing");
+  });
+}
+
+$("#play-btn").onclick = () => audio.paused ? audio.play() : audio.pause();
+audio.onplay = () => { $("#play-icon").className = "fi fi-rr-pause"; $("#p-cover").classList.add("spin"); };
+audio.onpause = () => { $("#play-icon").className = "fi fi-rr-play"; $("#p-cover").classList.remove("spin"); };
+audio.onended = () => { if (waveMode) nextInWave(); else { qIndex++; if (qIndex < queue.length) playCurrent(); } };
+audio.ontimeupdate = () => {
+  if (!audio.duration) return;
+  $("#progress div").style.width = (audio.currentTime / audio.duration * 100) + "%";
+  $("#t-cur").textContent = fmt(audio.currentTime * 1000);
+  $("#t-dur").textContent = fmt(audio.duration * 1000);
+  highlightLyrics();
+};
+$("#progress").onclick = e => {
+  if (!audio.duration) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  audio.currentTime = (e.clientX - rect.left) / rect.width * audio.duration;
+};
+// ---------------- Перетаскивание прогресса -------------------------
+(function() {
+  const bar = $("#progress");
+  let dragging = false;
+  let preview = 0;
+
+  function timeFromEvent(e) {
+    const rect = bar.getBoundingClientRect();
+    return Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width)) * (audio.duration || 0);
+  }
+  bar.addEventListener("pointerdown", e => {
+    if (!audio.duration) return;
+    dragging = true;
+    bar.setPointerCapture(e.pointerId);
+    preview = timeFromEvent(e);
+    $("#progress div").style.width = (preview / audio.duration * 100) + "%";
+  });
+  bar.addEventListener("pointermove", e => {
+    if (dragging && audio.duration) {
+      preview = timeFromEvent(e);
+      $("#progress div").style.width = (preview / audio.duration * 100) + "%";
+    }
+  });
+  const stop = () => {
+    if (dragging) {
+      dragging = false;
+      if (audio.duration) audio.currentTime = preview;
+    }
+  };
+  bar.addEventListener("pointerup", stop);
+  bar.addEventListener("pointercancel", stop);
+})();
+$("#next-btn").onclick = () => {
+  if (waveMode) nextInWave();
+  else if (qIndex < queue.length - 1) { qIndex++; playCurrent(); }
+};
+// ------------------------- Shuffle -------------------------
+let shuffled = false;
+$("#shuffle-btn").onclick = () => {
+  if (!queue.length) { toast("Очередь пуста"); return; }
+  if (!shuffled) {
+    // перемешиваем: текущий трек наверх, остальное случайно
+    const cur = currentTrack;
+    const rest = queue.filter(t => t !== cur);
+    for (let i = rest.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [rest[i], rest[j]] = [rest[j], rest[i]];
+    }
+    queue = cur ? [cur, ...rest] : rest;
+    qIndex = 0;
+    shuffled = true;
+    $("#shuffle-btn").classList.add("active-sh");
+    toast("Перемешано: " + queue.length + " треков");
+    // перерисовываем список, если он соответствует очереди
+    if (currentPage === "pl-page" && currentPlId) openPlaylistPage(currentPlId);
+    else if (currentPage === "likes-page") loadLikes();
+  } else {
+    shuffled = false;
+    $("#shuffle-btn").classList.remove("active-sh");
+    toast("Обычный порядок");
+  }
+};
+$("#prev-btn").onclick = () => {
+  if (audio.currentTime > 3) { audio.currentTime = 0; return; }
+  if (qIndex > 0) { qIndex--; playCurrent(); }
+};
+
+// ------------------------- Громкость (плавная) -------------------------
+let fadeRAF = null, targetVolume = null;
+function fadeVolumeTo(v, ms = 350) {
+  targetVolume = Math.min(1, Math.max(0, v));
+  const from = audio.volume;
+  const start = performance.now();
+  if (fadeRAF) cancelAnimationFrame(fadeRAF);
+  const step = now => {
+    const k = Math.min(1, (now - start) / ms);
+    const cur = from + (targetVolume - from) * k;
+    audio.volume = cur;
+    $("#vol-slider div").style.width = (cur * 100) + "%";
+    updateVolIcon(cur);
+    if (k < 1) fadeRAF = requestAnimationFrame(step);
+    else {
+      volume = targetVolume;
+      muted = volume === 0;
+      $("#vol-wrap").classList.toggle("muted", muted);
+      if (volume > 0) { try { localStorage.setItem("vol", String(volume)); } catch {} lastVolume = volume; }
+    }
+  };
+  fadeRAF = requestAnimationFrame(step);
+}
+function updateVolIcon(v) {
+  $("#vol-icon").className = "fi " + (v === 0 ? "fi-rr-volume-mute" : "fi-rr-volume");
+}
+function setVolume(v, save = true) {
+  if (save) fadeVolumeTo(v);
+  else {
+    volume = Math.min(1, Math.max(0, v));
+    muted = volume === 0;
+    audio.volume = volume;
+    audio.muted = false;
+    $("#vol-slider div").style.width = (volume * 100) + "%";
+    updateVolIcon(volume);
+    $("#vol-wrap").classList.toggle("muted", muted);
+  }
+}
+$("#vol-slider").onclick = e => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  fadeVolumeTo((e.clientX - rect.left) / rect.width);
+};
+// ---------------- Перетаскивание ползунка громкости ----------------
+(function() {
+  const slider = $("#vol-slider");
+  let dragging = false;
+
+  function volumeFromEvent(e) {
+    const rect = slider.getBoundingClientRect();
+    return Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+  }
+  slider.addEventListener("pointerdown", e => {
+    dragging = true;
+    slider.setPointerCapture(e.pointerId);
+    fadeVolumeTo(volumeFromEvent(e), 80); // при drag — быстрее
+  });
+  slider.addEventListener("pointermove", e => {
+    if (dragging) fadeVolumeTo(volumeFromEvent(e), 60);
+  });
+  const stop = e => { if (dragging) { dragging = false; try { slider.releasePointerCapture(e.pointerId); } catch {} } };
+  slider.addEventListener("pointerup", stop);
+  slider.addEventListener("pointercancel", stop);
+})();
+$("#vol-btn").onclick = () => {
+  if (muted || audio.volume === 0) { fadeVolumeTo(lastVolume > 0 ? lastVolume : 0.8); }
+  else { lastVolume = audio.volume || volume; fadeVolumeTo(0, 250); }
+};
+setVolume(volume, false);
+
+// колесо мыши над громкостью — плавная регулировка
+$("#vol-wrap").addEventListener("wheel", e => {
+  e.preventDefault();
+  fadeVolumeTo((targetVolume ?? audio.volume) + (e.deltaY < 0 ? .06 : -.06), 150);
+}, { passive: false });
+
+// ------------------------- Полный экран (нативный) -------------------------
+let fsActive = false;
+async function toggleFullscreen() {
+  const r = await py("toggle_fullscreen").catch(() => ({ ok: false }));
+  if (r.ok) {
+    fsActive = !fsActive;
+    $("#fs-btn").innerHTML = fsActive ? '<i class="fi fi-rr-compress"></i>' : '<i class="fi fi-rr-expand"></i>';
+    return;
+  }
+  // фолбэк — браузерный фулскрин
+  try {
+    if (!document.fullscreenElement) { await document.documentElement.requestFullscreen(); fsActive = true; }
+    else { await document.exitFullscreen(); fsActive = false; }
+    $("#fs-btn").innerHTML = fsActive ? '<i class="fi fi-rr-compress"></i>' : '<i class="fi fi-rr-expand"></i>';
+  } catch {}
+}
+$("#fs-btn").onclick = toggleFullscreen;
+document.addEventListener("keydown", e => {
+  if (e.key === "F11") { e.preventDefault(); toggleFullscreen(); }
+  if (e.key === "Escape" && $("#lyrics-overlay").classList.contains("show")) {
+    closeLyrics();
+  }
+});
+
+// ------------------------- Лирика -------------------------
+let lyricsLines = [], lyricsActive = -1;
+function closeLyrics() {
+  $("#lyrics-overlay").classList.remove("show");
+  document.body.classList.remove("lyrics-open");
+}
+$("#lyrics-btn").onclick = async () => {
+  if (!currentTrack) { toast("Сначала включи трек"); return; }
+  $("#l-title").textContent = currentTrack.title;
+  $("#l-artist").textContent = currentTrack.artists;
+  $("#l-cover").src = currentTrack.cover || "";
+  $("#lyrics-overlay .lyrics-bg").style.backgroundImage = currentTrack.cover ? `url("${currentTrack.cover}")` : "";
+  $("#lyrics-overlay .lyrics-bg").style.opacity = currentTrack.cover ? "1" : "0";
+  $("#lyrics-body").innerHTML = '<div class="placeholder"><i class="fi fi-rr-align-left"></i>Загружаю текст…</div>';
+  $("#lyrics-overlay").classList.add("show");
+  document.body.classList.add("lyrics-open");
+  const r = await py("get_lyrics", String(currentTrack.id)).catch(e => ({ ok: false, error: String(e) }));
+  if (!$("#lyrics-overlay").classList.contains("show")) return; // уже закрыли
+  if (!r.ok) {
+    $("#lyrics-body").innerHTML = '<div class="placeholder"><i class="fi fi-rr-cross"></i>Не удалось загрузить текст</div>';
+    return;
+  }
+  if (!r.lines.length) {
+    $("#lyrics-body").innerHTML = '<div class="placeholder"><i class="fi fi-rr-comment"></i>Для этого трека текст не найден</div>';
+    return;
+  }
+  lyricsLines = r.lines;
+  lyricsActive = -1;
+  $("#lyrics-body").innerHTML = r.lines.map((l, i) =>
+    `<div class="line" data-li="${i}">${esc(l.text)}</div>`).join("");
+};
+$("#lyrics-close").onclick = closeLyrics;
+$("#lyrics-overlay").addEventListener("click", e => {
+  if (e.target.id === "lyrics-overlay" || e.target.id === "lyrics-body") {
+    closeLyrics();
+  }
+});
+
+function highlightLyrics() {
+  if (!lyricsLines.length || !$("#lyrics-overlay").classList.contains("show")) return;
+  const t = audio.currentTime + 0.3; // чуть забегаем вперёд — как в Яндексе
+  let idx = -1;
+  for (let i = 0; i < lyricsLines.length; i++) {
+    if (lyricsLines[i].t <= t) idx = i; else break;
+  }
+  if (idx === lyricsActive) return;
+  lyricsActive = idx;
+  const rows = $("#lyrics-body").querySelectorAll(".line");
+  rows.forEach(r => r.classList.remove("active"));
+  const cur = rows[idx];
+  if (cur) {
+    cur.classList.add("active");
+    // прокрутка только если строка реально за пределами центра
+    const body = $("#lyrics-body");
+    const target = cur.offsetTop - body.clientHeight / 2 + cur.clientHeight / 2;
+    if (Math.abs(body.scrollTop - target) > 40) {
+      body.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
+    }
+  }
+}
+
+// ------------------------- Импорт плейлистов -------------------------
+$("#import-pl-btn").onclick = () => {
+  $("#import-url").value = "";
+  $("#import-status").textContent = "";
+  $("#import-status").className = "";
+  $("#import-modal").classList.remove("hidden");
+};
+$("#import-close").onclick = () => $("#import-modal").classList.add("hidden");
+$("#import-modal").addEventListener("click", e => {
+  if (e.target.id === "import-modal") e.currentTarget.classList.add("hidden");
+});
+$("#import-url").addEventListener("keydown", e => { if (e.key === "Enter") $("#import-go").click(); });
+$("#import-go").onclick = async () => {
+  const url = $("#import-url").value.trim();
+  if (!url) return;
+  $("#import-go").disabled = true;
+  $("#import-status").className = "";
+  $("#import-progress-box").classList.remove("hidden");
+  $("#import-progress-bar div").style.width = "0%";
+
+  // опрос прогресса
+  const poll = setInterval(async () => {
+    try {
+      const p = await py("import_progress");
+      if (p && p.ok && p.total) {
+        const pct = Math.round(p.done / p.total * 100);
+        $("#import-progress-bar div").style.width = pct + "%";
+        $("#import-progress-text").textContent =
+          `${p.stage}: ${p.done} / ${p.total} · найдено ${p.found}`;
+      }
+    } catch {}
+  }, 800);
+
+  const r = await py("import_playlist", url).catch(e => ({ ok: false, error: String(e) }));
+  clearInterval(poll);
+  $("#import-go").disabled = false;
+  if (!r.ok) {
+    $("#import-status").className = "err";
+    $("#import-status").textContent = r.error || "Ошибка импорта";
+    $("#import-progress-box").classList.add("hidden");
+    return;
+  }
+  await loadLibrary();
+  $("#import-progress-bar div").style.width = "100%";
+  $("#import-progress-text").textContent = "Готово!";
+  setTimeout(() => $("#import-progress-box").classList.add("hidden"), 1500);
+  $("#import-status").textContent =
+    `«${r.title}»: найдено ${r.found} из ${r.found + r.notfound} треков` +
+    (r.notfound_list && r.notfound_list.length
+      ? ` · не нашли: ${r.notfound_list.slice(0, 5).join("; ")}${r.notfound > 5 ? " и др." : ""}` : "") +
+    ` · волна из этого плейлиста — кнопка 🌊 на его странице`;
+  toast("Плейлист импортирован: " + r.found + " треков");
+};
+
+// ------------------------- Качество звука -------------------------
+let audioQuality = "aac";
+try { audioQuality = localStorage.getItem("audio_quality") || "aac"; } catch {}
+function updateQualityUI() {
+  document.querySelectorAll(".q-choice").forEach(q => q.classList.toggle("selected", q.dataset.q === audioQuality));
+}
+$("#quality-btn").onclick = () => { updateQualityUI(); $("#quality-modal").classList.remove("hidden"); };
+$("#quality-close").onclick = () => $("#quality-modal").classList.add("hidden");
+$("#quality-modal").addEventListener("click", e => {
+  if (e.target.id === "quality-modal") e.currentTarget.classList.add("hidden");
+});
+document.querySelectorAll(".q-choice").forEach(q =>
+  q.onclick = () => {
+    audioQuality = q.dataset.q;
+    try { localStorage.setItem("audio_quality", audioQuality); } catch {}
+    updateQualityUI();
+    toast("Качество: " + q.querySelector("b").textContent);
+  });
+
+// ------------------------- Эквалайзер (Web Audio) -------------------------
+let eqNode = null, audioCtx = null, eqGains = [0, 0, 0, 0, 0];
+const EQ_FREQS = [60, 230, 910, 3600, 14000];
+try { eqGains = JSON.parse(localStorage.getItem("eq_gains") || "null") || eqGains; } catch {}
+
+function ensureEqChain() {
+  if (eqNode) return true;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = audioCtx.createMediaElementSource(audio);
+    eqNode = EQ_FREQS.map((f, i) => {
+      const b = audioCtx.createBiquadFilter();
+      b.type = i === 0 ? "lowshelf" : (i === EQ_FREQS.length - 1 ? "highshelf" : "peaking");
+      b.frequency.value = f;
+      b.Q.value = 1;
+      b.gain.value = eqGains[i] || 0;
+      return b;
+    });
+    let node = src;
+    for (const f of eqNode) { node.connect(f); node = f; }
+    node.connect(audioCtx.destination);
+    return true;
+  } catch (e) {
+    console.warn("EQ init failed", e);
+    return false;
+  }
+}
+function applyEqGains() {
+  if (eqNode) eqNode.forEach((b, i) => { if (b) b.gain.value = eqGains[i] || 0; });
+  try { localStorage.setItem("eq_gains", JSON.stringify(eqGains)); } catch {}
+}
+function updateEqUI() {
+  document.querySelectorAll('.eq-band input[data-b]').forEach(inp => {
+    inp.value = eqGains[parseInt(inp.dataset.b)];
+  });
+}
+$("#eq-btn").onclick = () => {
+  if (!eqNode) {
+    if (!ensureEqChain()) { toast("Эквалайзер недоступен в этом окружении"); return; }
+    audioCtx.resume();
+  }
+  updateEqUI();
+  $("#eq-modal").classList.remove("hidden");
+};
+$("#eq-close").onclick = () => $("#eq-modal").classList.add("hidden");
+$("#eq-modal").addEventListener("click", e => {
+  if (e.target.id === "eq-modal") e.currentTarget.classList.add("hidden");
+});
+document.querySelectorAll('.eq-band input[data-b]').forEach(inp =>
+  inp.addEventListener("input", () => {
+    eqGains[parseInt(inp.dataset.b)] = parseFloat(inp.value);
+    applyEqGains();
+    document.querySelectorAll(".eq-preset").forEach(p => p.classList.remove("active"));
+  }));
+document.querySelectorAll(".eq-preset").forEach(btn =>
+  btn.onclick = () => {
+    const g = btn.dataset.g.split(",").map(parseFloat);
+    eqGains = g.slice(0, 5);
+    if (!eqNode) ensureEqChain();
+    applyEqGains();
+    updateEqUI();
+    document.querySelectorAll(".eq-preset").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+  });
+
+// ------------------------- Настройки / темы -------------------------
+const THEMES = [
+  { id: "sky",     name: "Небесный",  a: "#4dc2ff", dim: "#2a8fc9", glow: "rgba(77,194,255,.35)" },
+  { id: "violet",  name: "Фиолет",    a: "#a76bff", dim: "#6a3fc9", glow: "rgba(167,107,255,.35)" },
+  { id: "pink",    name: "Розовый",   a: "#ff6bb5", dim: "#c92a7f", glow: "rgba(255,107,181,.35)" },
+  { id: "green",   name: "Мятный",    a: "#4dffb0", dim: "#1fc97a", glow: "rgba(77,255,176,.35)" },
+  { id: "orange",  name: "Закат",     a: "#ff9f4d", dim: "#c9641f", glow: "rgba(255,159,77,.35)" },
+  { id: "red",     name: "Красный",   a: "#ff5c5c", dim: "#c91f1f", glow: "rgba(255,92,92,.35)" },
+  { id: "gold",    name: "Янтарь",    a: "#ffd24d", dim: "#c9a02e", glow: "rgba(255,210,77,.35)" },
+];
+let currentTheme = "sky";
+try { currentTheme = localStorage.getItem("theme") || "sky"; } catch {}
+
+function applyTheme(id) {
+  const th = THEMES.find(t => t.id === id) || THEMES[0];
+  currentTheme = th.id;
+  const root = document.documentElement;
+  root.style.setProperty("--accent", th.a);
+  root.style.setProperty("--accent-dim", th.dim);
+  root.style.setProperty("--accent-glow", th.glow);
+  try { localStorage.setItem("theme", th.id); } catch {}
+  document.querySelectorAll(".swatch").forEach(s => s.classList.toggle("selected", s.dataset.theme === th.id));
+}
+function renderSwatches() {
+  $("#theme-swatches").innerHTML = THEMES.map(t =>
+    `<div class="swatch ${t.id === currentTheme ? "selected" : ""}" data-theme="${t.id}"
+       style="background:linear-gradient(135deg, ${t.a}, ${t.dim})" title="${t.name}"></div>`).join("");
+}
+$("#theme-btn").onclick = () => { renderSwatches(); $("#settings-modal").classList.remove("hidden"); };
+$("#settings-close").onclick = () => $("#settings-modal").classList.add("hidden");
+$("#settings-modal").addEventListener("click", e => {
+  if (e.target.id === "settings-modal") e.currentTarget.classList.add("hidden");
+});
+$("#theme-swatches").addEventListener("click", e => {
+  const sw = e.target.closest(".swatch");
+  if (sw) applyTheme(sw.dataset.theme);
+});
+applyTheme(currentTheme);
+
+// ------------------------- Старт -------------------------
+loadLibrary();
+</script>
+</body>
+</html>
